@@ -1,0 +1,1869 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Turismo Salamanca</title>
+
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f6f8;
+    color: #222;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+
+header {
+    background: linear-gradient(135deg, #006093, #0087bd);
+    color: white;
+    padding: 20px 25px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.2);
+    position: relative;
+    z-index: 2000;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+header p {
+    margin: 5px 0 0;
+    opacity: .9;
+}
+
+.autores {
+    margin-top: 8px;
+    font-size: 13px;
+    opacity: .85;
+}
+
+/* =========================================
+   CONTENEDOR
+========================================= */
+
+.contenedor {
+    display: flex;
+    height: calc(100vh - 105px);
+}
+
+/* =========================================
+   PANEL
+========================================= */
+
+aside {
+    width: 400px;
+    background: white;
+    padding: 18px;
+    overflow-y: auto;
+    box-shadow: 3px 0 12px rgba(0,0,0,.12);
+    z-index: 1000;
+}
+
+/* BUSCADOR */
+
+.buscador {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 15px;
+    margin-bottom: 15px;
+}
+
+.buscador:focus {
+    outline: none;
+    border-color: #0087bd;
+    box-shadow: 0 0 0 3px rgba(0,135,189,.12);
+}
+
+/* FILTROS */
+
+.titulo-filtro {
+    font-size: 11px;
+    font-weight: bold;
+    color: #777;
+    margin: 15px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.filtros button {
+    border: 1px solid #ddd;
+    background: white;
+    padding: 8px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: .2s;
+}
+
+.filtros button:hover {
+    transform: translateY(-1px);
+    background: #f1f3f5;
+}
+
+.filtros button.activo {
+    background: #006093;
+    color: white;
+    border-color: #006093;
+}
+
+/* CONTADOR */
+
+.contador {
+    margin: 15px 0 10px;
+    color: #777;
+    font-size: 13px;
+}
+
+/* =========================================
+   LISTA
+========================================= */
+
+.lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.lugar {
+    border: 1px solid #e1e1e1;
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    transition: .2s;
+    background: white;
+}
+
+.lugar:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,.09);
+}
+
+.lugar-nombre {
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 1.3;
+}
+
+.lugar-info {
+    font-size: 12px;
+    color: #777;
+    margin-top: 5px;
+}
+
+.badge {
+    display: inline-block;
+    margin-top: 7px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/* COLORES */
+
+.naturaleza {
+    background: #d8f3ef;
+    color: #18766d;
+}
+
+.arqueologia {
+    background: #fbd9dc;
+    color: #b51f2b;
+}
+
+.productos {
+    background: #ffedc9;
+    color: #a86600;
+}
+
+.patrimonio {
+    background: #dcecff;
+    color: #0061a8;
+}
+
+.plazas {
+    background: #dff2df;
+    color: #318531;
+}
+
+/* =========================================
+   MAPA
+========================================= */
+
+#mapa {
+    flex: 1;
+    height: 100%;
+    background: #ddd;
+}
+
+/* =========================================
+   MARCADORES
+========================================= */
+
+.emoji-marker {
+    background: transparent !important;
+    border: none !important;
+}
+
+.marker-emoji {
+
+    width: 48px;
+    height: 48px;
+
+    border-radius: 50%;
+
+    border: 3px solid white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 25px;
+
+    box-shadow:
+        0 3px 9px rgba(0,0,0,.4);
+
+    cursor: pointer;
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+
+    position: relative;
+}
+
+.marker-emoji:hover {
+    transform: scale(1.25);
+
+    box-shadow:
+        0 6px 16px rgba(0,0,0,.45);
+
+    z-index: 1000;
+}
+
+/* brillo */
+
+.marker-emoji::after {
+
+    content: "";
+
+    position: absolute;
+
+    top: 4px;
+    left: 8px;
+
+    width: 11px;
+    height: 6px;
+
+    background:
+        rgba(255,255,255,.55);
+
+    border-radius: 50%;
+
+    transform: rotate(-25deg);
+}
+
+/* =========================================
+   POPUP
+========================================= */
+
+.popup {
+    width: 300px;
+    max-width: 100%;
+}
+
+.popup h3 {
+    margin: 0 0 8px;
+    color: #006093;
+    font-size: 18px;
+    line-height: 1.3;
+}
+
+.popup-categoria {
+    font-size: 11px;
+    font-weight: bold;
+    color: #777;
+    margin-bottom: 12px;
+}
+
+.popup-seccion {
+
+    margin-top: 12px;
+
+    padding-top: 10px;
+
+    border-top: 1px solid #e5e5e5;
+}
+
+.popup-seccion strong {
+
+    display: block;
+
+    color: #006093;
+
+    margin-bottom: 5px;
+
+    font-size: 13px;
+}
+
+.popup-seccion p {
+
+    margin: 0;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+
+    color: #444;
+}
+
+.popup-ubicacion {
+
+    background: #f3f5f7;
+
+    padding: 8px;
+
+    border-radius: 7px;
+
+    font-size: 11px;
+
+    color: #666;
+
+    margin-top: 10px;
+}
+
+.coordenadas {
+
+    font-size: 10px;
+
+    color: #888;
+
+    margin-top: 6px;
+}
+
+.boton-maps {
+
+    display: block;
+
+    text-align: center;
+
+    background: #006093;
+
+    color: white !important;
+
+    padding: 10px;
+
+    border-radius: 8px;
+
+    text-decoration: none;
+
+    margin-top: 12px;
+
+    font-weight: bold;
+
+    transition: .2s;
+}
+
+.boton-maps:hover {
+    background: #004b73;
+}
+
+/* =========================================
+   LEYENDA
+========================================= */
+
+.leyenda {
+
+    background: white;
+
+    padding: 12px 15px;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 3px 12px rgba(0,0,0,.25);
+
+    font-size: 12px;
+}
+
+.leyenda-titulo {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.leyenda-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin: 5px 0;
+}
+
+.leyenda-emoji {
+
+    width: 27px;
+    height: 27px;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    font-size: 15px;
+}
+
+/* =========================================
+   BOTÓN CENTRAR
+========================================= */
+
+.centrar {
+
+    border: none;
+
+    background: white;
+
+    padding: 10px 13px;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 3px 10px rgba(0,0,0,.25);
+
+    font-weight: bold;
+}
+
+.centrar:hover {
+    background: #f1f1f1;
+}
+
+/* =========================================
+   MÓVIL
+========================================= */
+
+@media (max-width: 800px) {
+
+    header h1 {
+        font-size: 22px;
+    }
+
+    .contenedor {
+        flex-direction: column;
+        height: auto;
+    }
+
+    aside {
+        width: 100%;
+        height: 48vh;
+        order: 2;
+    }
+
+    #mapa {
+        height: 52vh;
+        order: 1;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================
+     HEADER
+========================================= -->
+
+<header>
+
+    <h1>
+        🌄 Turismo Salamanca
+    </h1>
+
+    <p>
+        Descubre los atractivos turísticos de la comuna de Salamanca
+    </p>
+        <p> 
+        Colegio Corazón De Jesús.
+
+    <div class="autores">
+        Por: Luciano Pincetti y Natalia Acosta
+    </div>
+
+
+</header>
+
+
+<div class="contenedor">
+
+
+<!-- =========================================
+     PANEL LATERAL
+========================================= -->
+
+<aside>
+
+
+<input
+    type="text"
+    id="buscador"
+    class="buscador"
+    placeholder="🔎 Buscar un lugar..."
+>
+
+
+<div class="titulo-filtro">
+    Categoría
+</div>
+
+
+<div
+    class="filtros"
+    id="filtrosCategoria"
+>
+
+    <button
+        class="activo"
+        data-categoria="Todos"
+    >
+        🗺️ Todos
+    </button>
+
+    <button data-categoria="Naturaleza">
+        🌄 Naturaleza
+    </button>
+
+    <button data-categoria="Arqueologia">
+        🪨 Arqueología
+    </button>
+
+    <button data-categoria="Productos">
+        🧀🍷 Productos
+    </button>
+
+    <button data-categoria="Patrimonio">
+        🏛️ Patrimonio
+    </button>
+
+    <button data-categoria="Plazas">
+        🌳 Plazas
+    </button>
+
+</div>
+
+
+<div class="titulo-filtro">
+    Valle
+</div>
+
+
+<div
+    class="filtros"
+    id="filtrosValle"
+>
+
+    <button
+        class="activo"
+        data-valle="Todos"
+    >
+        🗺️ Todos
+    </button>
+
+    <button data-valle="Urbano">
+        🏙️ Urbano
+    </button>
+
+    <button data-valle="Choapa">
+        🏔️ Choapa
+    </button>
+
+    <button data-valle="Chalinga">
+        🌄 Chalinga
+    </button>
+
+    <button data-valle="Camisa">
+        ⛰️ Camisa
+    </button>
+
+</div>
+
+
+<div
+    class="contador"
+    id="contador"
+>
+    28 atractivos encontrados
+</div>
+
+
+<div
+    class="lista"
+    id="lista"
+></div>
+
+
+</aside>
+
+
+<!-- MAPA -->
+
+<div id="mapa"></div>
+
+
+</div>
+
+
+<script
+src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+
+<script>
+
+
+/* ==========================================================
+   DATOS TURÍSTICOS
+========================================================== */
+
+const lugares = [
+
+/* ---------- NATURALEZA ---------- */
+
+{
+nombre: "Localidad de Zapallar",
+categoria: "Naturaleza",
+valle: "Chalinga",
+lat: -31.7052606,
+lng: -70.7541401,
+emoji: "🌄",
+color: "#2a9d8f",
+ubicacion: "Ubicado a 27 km de Salamanca por la Ruta D-845",
+
+queEs:
+"Localidad ubicada junto al río Chalinga, rodeada de paisaje cordillerano y vestigios de antiguas culturas.",
+
+hacer:
+"Recorrer la localidad, apreciar el paisaje, conocer los petroglifos de los alrededores y disfrutar de la tranquilidad del valle."
+},
+
+{
+nombre: "Mirador Raja de Manquehua",
+categoria: "Naturaleza",
+valle: "Chalinga",
+lat: -31.6859252,
+lng: -70.9433269,
+emoji: "🏔️",
+color: "#2a9d8f",
+ubicacion: "Localidad de Manquehua, a 12 km de Salamanca. Ruta D-827",
+
+queEs:
+"Imponente formación geológica ubicada en Manquehua, conocida por su gran abertura rocosa y su valor natural.",
+
+hacer:
+"Contemplar la formación rocosa, disfrutar del paisaje cordillerano y conocer las historias y leyendas asociadas al lugar."
+},
+
+{
+nombre: "Poza Azul",
+categoria: "Naturaleza",
+valle: "Chalinga",
+lat: -31.6882786,
+lng: -70.8729657,
+emoji: "💧",
+color: "#2a9d8f",
+ubicacion: "Localidad de La Jarilla, a 27 km de Salamanca. Ruta D-827",
+
+queEs:
+"Santuario de la Naturaleza formado por una caída de agua de más de 30 metros y una poza de aguas cristalinas.",
+
+hacer:
+"Contemplar la cascada, recorrer el entorno natural, observar flora y fauna y disfrutar del paisaje."
+},
+
+{
+nombre: "Embalse Corrales",
+categoria: "Naturaleza",
+valle: "Camisa",
+lat: -31.9104878,
+lng: -70.9158823,
+emoji: "💧",
+color: "#2a9d8f",
+ubicacion: "Sector de Corrales. Ruta D-847",
+
+queEs:
+"Embalse ubicado en un entorno rural que combina naturaleza, agricultura y tradiciones locales.",
+
+hacer:
+"Disfrutar del paisaje, observar los cielos nocturnos, practicar fotografía y conocer el entorno rural y sus actividades tradicionales."
+},
+
+{
+nombre: "Tazas de Quelén",
+categoria: "Naturaleza",
+valle: "Choapa",
+lat: -31.9647273,
+lng: -70.7738898,
+emoji: "💦",
+color: "#2a9d8f",
+ubicacion: "Quelén Alto, a 45 km de Salamanca. Ruta D-825 y D-861",
+
+queEs:
+"Salto de agua que forma tres pozas naturales de diferentes tamaños y profundidades.",
+
+hacer:
+"Contemplar las cascadas, fotografiar el paisaje y disfrutar de la naturaleza del estero Quelén."
+},
+
+{
+nombre: "Colliguay Observatorio Natural",
+categoria: "Naturaleza",
+valle: "Camisa",
+lat: -31.8237083,
+lng: -71.0151490,
+emoji: "🌌",
+color: "#2a9d8f",
+ubicacion: "Localidad de Colliguay. Ruta D-847",
+
+queEs:
+"Sector privilegiado para la observación del cielo nocturno debido a sus condiciones de baja contaminación lumínica.",
+
+hacer:
+"Observar las estrellas y constelaciones, practicar fotografía nocturna y disfrutar del astroturismo."
+},
+
+{
+nombre: "Salto Los González",
+categoria: "Naturaleza",
+valle: "Choapa",
+lat: -31.9795806,
+lng: -70.5163626,
+emoji: "🥾",
+color: "#2a9d8f",
+ubicacion: "Localidad de Batuco. Ruta D-825",
+
+queEs:
+"Cascada ubicada en la cordillera de la localidad de Batuco, a la que se llega mediante una extensa caminata.",
+
+hacer:
+"Realizar trekking, recorrer senderos cordilleranos, contemplar la cascada y disfrutar de los paisajes naturales."
+},
+
+{
+nombre: "Salto Junta de Los Ríos",
+categoria: "Naturaleza",
+valle: "Choapa",
+lat: -31.9976917,
+lng: -70.5496257,
+emoji: "🥾",
+color: "#2a9d8f",
+ubicacion: "Localidad de Batuco. Ruta D-825",
+
+queEs:
+"Cascada ubicada en un sector cordillerano donde confluyen las aguas que dan origen al río Choapa.",
+
+hacer:
+"Realizar trekking, recorrer los senderos, fotografiar la cascada y disfrutar del paisaje cordillerano."
+},
+
+
+/* ---------- ARQUEOLOGÍA ---------- */
+
+{
+nombre: "Petroglifos Santa Rosa",
+categoria: "Arqueologia",
+valle: "Choapa",
+lat: -31.8105909,
+lng: -70.9228288,
+emoji: "🪨",
+color: "#e63946",
+ubicacion: "Localidad de Santa Rosa, sector Alto",
+
+queEs:
+"Sitio arqueológico con manifestaciones de arte rupestre asociadas a antiguas culturas del Valle del Choapa.",
+
+hacer:
+"Observar los petroglifos y conocer parte del patrimonio arqueológico y cultural de Salamanca."
+},
+
+{
+nombre: "Petroglifos Chalinga",
+categoria: "Arqueologia",
+valle: "Chalinga",
+lat: -31.7709263,
+lng: -70.9777887,
+emoji: "🪨",
+color: "#e63946",
+ubicacion: "Localidad de Chalinga. Av. Argentina, Ruta D-845",
+
+queEs:
+"Conjunto de manifestaciones rupestres realizadas por antiguas comunidades que habitaron el Valle del Choapa.",
+
+hacer:
+"Observar los grabados rupestres y conocer la historia de las culturas Molle, Diaguita y Diaguita-Inka."
+},
+
+{
+nombre: "Petroglifos - Coirón",
+categoria: "Arqueologia",
+valle: "Choapa",
+lat: -31.9280500,
+lng: -70.8436971,
+emoji: "🪨",
+color: "#e63946",
+ubicacion: "Localidad de Coirón. Ruta D-835",
+
+queEs:
+"Sitio arqueológico perteneciente al conjunto de petroglifos distribuidos por el Valle de Salamanca.",
+
+hacer:
+"Observar las manifestaciones rupestres y conocer el legado de los pueblos que habitaron antiguamente el valle."
+},
+
+{
+nombre: "Petroglifos Tranquilla",
+categoria: "Arqueologia",
+valle: "Choapa",
+lat: -31.883455,
+lng: -70.682941,
+emoji: "🪨",
+color: "#e63946",
+ubicacion: "Localidad de Tranquilla. Ruta D-825",
+
+queEs:
+"Sitio de arte rupestre asociado a antiguas comunidades Molle, Diaguitas y Diaguita-Inka.",
+
+hacer:
+"Observar petroglifos, conocer su significado cultural y apreciar el patrimonio arqueológico del valle."
+},
+
+
+/* ---------- PRODUCTOS ---------- */
+
+{
+nombre: "Viñas de Coirón (Wayra y Foupin)",
+categoria: "Productos",
+valle: "Choapa",
+lat: -31.8928463,
+lng: -70.7389145,
+emoji: "🍷",
+color: "#fca311",
+ubicacion: "Localidad de Coirón",
+
+queEs:
+"Sector vitivinícola donde se encuentran Viña Wayra y Viña Arnoud Foupin, dedicadas a la producción artesanal y orgánica de vinos.",
+
+hacer:
+"Conocer el proceso de elaboración, degustar vinos, recorrer el entorno y disfrutar de una experiencia de enoturismo."
+},
+
+{
+nombre: "Viña Siete Brujas",
+categoria: "Productos",
+valle: "Camisa",
+lat: -31.8342200,
+lng: -70.9983596,
+emoji: "🍷",
+color: "#fca311",
+ubicacion: "Localidad de Colliguay. Ruta D-825 y D-847",
+
+queEs:
+"Viña y espacio de producción artesanal dedicado a vinos, pisco y mistela.",
+
+hacer:
+"Conocer el proceso de producción, recorrer el lugar y descubrir la elaboración tradicional de sus productos."
+},
+
+{
+nombre: "Viña Choapa",
+categoria: "Productos",
+valle: "Choapa",
+lat: -31.8325216,
+lng: -70.8799320,
+emoji: "🍷",
+color: "#fca311",
+ubicacion: "Localidad de Panguesillo. Ruta D-825",
+
+queEs:
+"Viña del Valle del Choapa que produce vinos en un entorno de características climáticas y minerales particulares.",
+
+hacer:
+"Conocer el proceso vitivinícola y descubrir los vinos producidos en el valle."
+},
+
+{
+nombre: "Cervecería Brujas",
+categoria: "Productos",
+valle: "Urbano",
+lat: -31.7745491,
+lng: -70.9873211,
+emoji: "🍺",
+color: "#fca311",
+ubicacion: "Localidad de El Boldo. Ruta D-81",
+
+queEs:
+"Primera cervecería artesanal de Salamanca, dedicada a elaborar cervezas con ingredientes naturales.",
+
+hacer:
+"Conocer la producción artesanal y descubrir variedades inspiradas en lugares y elementos de Salamanca."
+},
+
+{
+nombre: "Quesería El Tebal",
+categoria: "Productos",
+valle: "Urbano",
+lat: -31.7556071,
+lng: -70.9792526,
+emoji: "🧀",
+color: "#fca311",
+ubicacion: "Localidad de El Tebal. Ruta D-827",
+
+queEs:
+"Emprendimiento familiar dedicado a elaborar artesanalmente quesos y manjares a partir de leche de cabra.",
+
+hacer:
+"Conocer el proceso de producción, degustar productos locales y vivir una experiencia de turismo rural."
+},
+
+{
+nombre: "Viña Salamanca",
+categoria: "Productos",
+valle: "Choapa",
+lat: -31.889269,
+lng: -70.620693,
+emoji: "🍷",
+color: "#fca311",
+ubicacion: "Localidad de Cuncumén. Ruta D-835",
+
+queEs:
+"Viña ubicada a unos 1.100 metros de altura, destacando por ser una de las viñas de mayor altura del Valle del Choapa.",
+
+hacer:
+"Recorrer los viñedos, conocer la producción y participar en experiencias de enoturismo y catas."
+},
+
+{
+nombre: "Quesería Petricor",
+categoria: "Productos",
+valle: "Urbano",
+lat: -31.7847854,
+lng: -71.0118236,
+emoji: "🧀",
+color: "#fca311",
+ubicacion: "Localidad de El Tambo. Ruta D-825",
+
+queEs:
+"Quesería dedicada a la elaboración artesanal de quesos premium a base de leche de cabra pasteurizada.",
+
+hacer:
+"Degustar productos locales, conocer el proceso artesanal y descubrir el trabajo de la producción caprina."
+},
+
+
+/* ---------- PATRIMONIO ---------- */
+
+{
+nombre: "Bodegón Pare Bien",
+categoria: "Patrimonio",
+valle: "Urbano",
+lat: -31.7660123,
+lng: -70.9706907,
+emoji: "🏡",
+color: "#007bff",
+ubicacion: "Localidad de Cancha Brava. Ruta D-845",
+
+queEs:
+"Casa patronal construida en 1825 que conserva elementos de la vida rural tradicional de Salamanca.",
+
+hacer:
+"Recorrer el museo, observar objetos antiguos y herramientas de campo y conocer los antiguos hornos secadores de tabaco."
+},
+
+{
+nombre: "Puente Colgante Coirón",
+categoria: "Patrimonio",
+valle: "Choapa",
+lat: -31.8974837,
+lng: -70.7720232,
+emoji: "🌉",
+color: "#007bff",
+ubicacion: "Localidad de Coirón. Ruta D-835",
+
+queEs:
+"Histórico puente colgante peatonal de madera construido aproximadamente en 1900.",
+
+hacer:
+"Conocer su historia, observar su estructura y disfrutar del paisaje del Valle del Choapa."
+},
+
+{
+nombre: "Museo de Salamanca",
+categoria: "Patrimonio",
+valle: "Urbano",
+lat: -31.7821765,
+lng: -70.9591549,
+emoji: "🏛️",
+color: "#007bff",
+ubicacion: "Tomás Davis - O'Higgins, Salamanca",
+
+queEs:
+"Espacio dedicado a conservar fotografías, objetos y testimonios relacionados con la historia y cultura del Valle del Choapa.",
+
+hacer:
+"Recorrer las exposiciones, observar fotografías y conocer parte de la historia y patrimonio de Salamanca."
+},
+
+{
+nombre: "Estación Ferrocarril",
+categoria: "Patrimonio",
+valle: "Urbano",
+lat: -31.7757671,
+lng: -70.9702953,
+emoji: "🚂",
+color: "#007bff",
+ubicacion: "Calle Providencia, Salamanca",
+
+queEs:
+"Antigua estación ferroviaria inaugurada en 1914 y posteriormente restaurada como espacio patrimonial.",
+
+hacer:
+"Conocer la antigua estación, recorrer sus alrededores y aprender sobre la historia ferroviaria de Salamanca."
+},
+
+{
+nombre: "Museo Comunitario",
+categoria: "Patrimonio",
+valle: "Urbano",
+lat: -31.7832951,
+lng: -70.9605039,
+emoji: "🏛️",
+color: "#007bff",
+ubicacion: "Manuel Bulnes 101, Salamanca",
+
+queEs:
+"Espacio que conserva elementos de la identidad local, tradiciones campesinas y raíces culturales de Salamanca.",
+
+hacer:
+"Observar objetos antiguos, herramientas rurales, fotografías y conocer aspectos de la vida tradicional de la comuna."
+},
+
+{
+nombre: "Santuario Señor de la Tierra",
+categoria: "Patrimonio",
+valle: "Chalinga",
+lat: -31.730381,
+lng: -70.913960,
+emoji: "⛪",
+color: "#007bff",
+ubicacion: "Valle de Chalinga, a 12 km de Salamanca",
+
+queEs:
+"Importante lugar de religiosidad popular y patrimonio cultural de Salamanca y la Provincia del Choapa.",
+
+hacer:
+"Conocer el santuario, su historia y tradición religiosa y apreciar el entorno del Valle de Chalinga."
+},
+
+
+/* ---------- PLAZAS ---------- */
+
+{
+nombre: "Plaza de Armas",
+categoria: "Plazas",
+valle: "Urbano",
+lat: -31.7803875,
+lng: -70.9648923,
+emoji: "⛲",
+color: "#5cb85c",
+ubicacion: "Centro de Salamanca",
+
+queEs:
+"Principal espacio público y punto de encuentro de Salamanca, con una superficie de más de 17 mil metros cuadrados.",
+
+hacer:
+"Caminar, descansar, disfrutar de la pileta central y observar la arquitectura y vida cotidiana de la ciudad."
+},
+
+{
+nombre: "Cerro de La Cruz",
+categoria: "Plazas",
+valle: "Urbano",
+lat: -31.7722464,
+lng: -70.9767899,
+emoji: "⛰️",
+color: "#5cb85c",
+ubicacion: "Salamanca, Región de Coquimbo",
+
+queEs:
+"Espacio natural y patrimonial donde se conservan petroglifos de antiguas culturas prehispánicas.",
+
+hacer:
+"Recorrer el entorno, apreciar los petroglifos y disfrutar de las vistas panorámicas del valle."
+},
+
+{
+nombre: "Parque Héroes de La Concepción",
+categoria: "Plazas",
+valle: "Urbano",
+lat: -31.7823268,
+lng: -70.9593309,
+emoji: "🌳",
+color: "#5cb85c",
+ubicacion: "Tomás Davis - O'Higgins, Salamanca",
+
+queEs:
+"Parque conocido también como Cerro Chico, uno de los espacios emblemáticos de Salamanca.",
+
+hacer:
+"Caminar por sus senderos, disfrutar de las áreas verdes, utilizar las zonas de descanso y observar las vistas panorámicas."
+}
+
+];
+
+
+/* ==========================================================
+   MAPA
+========================================================== */
+
+const mapa = L.map("mapa").setView(
+    [-31.7810127, -70.9658949],
+    11
+);
+
+
+/* MAPA ESRI */
+
+L.tileLayer(
+
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+
+    {
+        attribution: "Tiles © Esri"
+    }
+
+).addTo(mapa);
+
+
+/* ==========================================================
+   CREAR ICONO
+========================================================== */
+
+function crearIcono(lugar) {
+
+    return L.divIcon({
+
+        className: "emoji-marker",
+
+        html: `
+
+            <div
+                class="marker-emoji"
+                style="
+                    background:${lugar.color};
+                "
+            >
+                ${lugar.emoji}
+            </div>
+
+        `,
+
+        iconSize: [48,48],
+
+        iconAnchor: [24,48],
+
+        popupAnchor: [0,-45]
+
+    });
+
+}
+
+
+/* ==========================================================
+   MARCADORES
+========================================================== */
+
+const marcadores = [];
+
+
+lugares.forEach(
+    (lugar, indice) => {
+
+        const marcador =
+            L.marker(
+
+                [
+                    lugar.lat,
+                    lugar.lng
+                ],
+
+                {
+                    icon:
+                        crearIcono(lugar)
+                }
+
+            );
+
+
+        const urlMaps =
+
+            "https://www.google.com/maps/dir/?api=1&destination="
+
+            +
+
+            lugar.lat
+
+            +
+
+            ","
+
+            +
+
+            lugar.lng;
+
+
+        marcador.bindPopup(`
+
+            <div class="popup">
+
+                <h3>
+                    ${lugar.emoji}
+                    ${lugar.nombre}
+                </h3>
+
+
+                <div class="popup-categoria">
+
+                    ${lugar.emoji}
+
+                    ${lugar.categoria}
+
+                    ·
+
+                    ${lugar.valle}
+
+                </div>
+
+
+                <div class="popup-seccion">
+
+                    <strong>
+                        ℹ️ ¿Qué es?
+                    </strong>
+
+                    <p>
+                        ${lugar.queEs}
+                    </p>
+
+                </div>
+
+
+                <div class="popup-seccion">
+
+                    <strong>
+                        🎯 ¿Qué puedes hacer?
+                    </strong>
+
+                    <p>
+                        ${lugar.hacer}
+                    </p>
+
+                </div>
+
+
+                <div class="popup-ubicacion">
+
+                    📍 ${lugar.ubicacion}
+
+                </div>
+
+
+                <div class="coordenadas">
+
+                    Coordenadas:
+                    ${lugar.lat},
+                    ${lugar.lng}
+
+                </div>
+
+
+                <a
+                    class="boton-maps"
+                    href="${urlMaps}"
+                    target="_blank"
+                >
+
+                    📍 Cómo llegar
+
+                </a>
+
+            </div>
+
+        `);
+
+
+        marcador.addTo(mapa);
+
+
+        marcadores.push(
+            marcador
+        );
+
+    }
+);
+
+
+/* ==========================================================
+   FILTROS
+========================================================== */
+
+let categoriaActual = "Todos";
+
+let valleActual = "Todos";
+
+
+/* CLASE */
+
+function obtenerClase(categoria) {
+
+    return categoria
+
+        .toLowerCase()
+
+        .normalize("NFD")
+
+        .replace(
+            /[\u0300-\u036f]/g,
+            ""
+        );
+
+}
+
+
+/* ==========================================================
+   MOSTRAR LUGARES
+========================================================== */
+
+function mostrarLugares() {
+
+    const lista =
+        document.getElementById(
+            "lista"
+        );
+
+
+    const contador =
+        document.getElementById(
+            "contador"
+        );
+
+
+    const busqueda =
+        document
+        .getElementById(
+            "buscador"
+        )
+        .value
+        .toLowerCase()
+        .trim();
+
+
+    lista.innerHTML = "";
+
+
+    let cantidad = 0;
+
+
+    lugares.forEach(
+        (lugar, indice) => {
+
+
+            const coincideCategoria =
+
+                categoriaActual === "Todos"
+
+                ||
+
+                lugar.categoria ===
+                categoriaActual;
+
+
+            const coincideValle =
+
+                valleActual === "Todos"
+
+                ||
+
+                lugar.valle ===
+                valleActual;
+
+
+            const coincideBusqueda =
+
+                lugar.nombre
+                .toLowerCase()
+                .includes(busqueda)
+
+                ||
+
+                lugar.categoria
+                .toLowerCase()
+                .includes(busqueda)
+
+                ||
+
+                lugar.valle
+                .toLowerCase()
+                .includes(busqueda);
+
+
+            const visible =
+
+                coincideCategoria
+
+                &&
+
+                coincideValle
+
+                &&
+
+                coincideBusqueda;
+
+
+            if (visible) {
+
+                cantidad++;
+
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                item.className =
+                    "lugar";
+
+
+                const clase =
+                    obtenerClase(
+                        lugar.categoria
+                    );
+
+
+                item.innerHTML = `
+
+                    <div class="lugar-nombre">
+
+                        ${lugar.emoji}
+
+                        ${lugar.nombre}
+
+                    </div>
+
+
+                    <div class="lugar-info">
+
+                        📍 ${lugar.valle}
+
+                    </div>
+
+
+                    <span
+                        class="badge ${clase}"
+                    >
+
+                        ${lugar.emoji}
+
+                        ${lugar.categoria}
+
+                    </span>
+
+                `;
+
+
+                item.addEventListener(
+                    "click",
+                    () => {
+
+                        mapa.setView(
+
+                            [
+                                lugar.lat,
+                                lugar.lng
+                            ],
+
+                            15
+
+                        );
+
+
+                        marcadores[
+                            indice
+                        ].openPopup();
+
+                    }
+                );
+
+
+                lista.appendChild(
+                    item
+                );
+
+            }
+
+
+            if (visible) {
+
+                if (
+                    !mapa.hasLayer(
+                        marcadores[indice]
+                    )
+                ) {
+
+                    marcadores[
+                        indice
+                    ].addTo(mapa);
+
+                }
+
+            } else {
+
+                if (
+                    mapa.hasLayer(
+                        marcadores[indice]
+                    )
+                ) {
+
+                    mapa.removeLayer(
+                        marcadores[indice]
+                    );
+
+                }
+
+            }
+
+        }
+    );
+
+
+    contador.textContent =
+
+        cantidad +
+
+        (
+
+            cantidad === 1
+
+            ?
+
+            " atractivo encontrado"
+
+            :
+
+            " atractivos encontrados"
+
+        );
+
+}
+
+
+/* ==========================================================
+   FILTRO CATEGORÍA
+========================================================== */
+
+document
+.querySelectorAll(
+    "#filtrosCategoria button"
+)
+.forEach(
+    boton => {
+
+        boton.addEventListener(
+            "click",
+            () => {
+
+
+                document
+                .querySelectorAll(
+                    "#filtrosCategoria button"
+                )
+                .forEach(
+                    b =>
+                        b.classList
+                        .remove(
+                            "activo"
+                        )
+                );
+
+
+                boton.classList.add(
+                    "activo"
+                );
+
+
+                categoriaActual =
+                    boton.dataset.categoria;
+
+
+                mostrarLugares();
+
+            }
+        );
+
+    }
+);
+
+
+/* ==========================================================
+   FILTRO VALLE
+========================================================== */
+
+document
+.querySelectorAll(
+    "#filtrosValle button"
+)
+.forEach(
+    boton => {
+
+        boton.addEventListener(
+            "click",
+            () => {
+
+
+                document
+                .querySelectorAll(
+                    "#filtrosValle button"
+                )
+                .forEach(
+                    b =>
+                        b.classList
+                        .remove(
+                            "activo"
+                        )
+                );
+
+
+                boton.classList.add(
+                    "activo"
+                );
+
+
+                valleActual =
+                    boton.dataset.valle;
+
+
+                mostrarLugares();
+
+            }
+        );
+
+    }
+);
+
+
+/* ==========================================================
+   BUSCADOR
+========================================================== */
+
+document
+.getElementById(
+    "buscador"
+)
+.addEventListener(
+    "input",
+    mostrarLugares
+);
+
+
+/* ==========================================================
+   LEYENDA
+========================================================== */
+
+const leyenda =
+    L.control({
+        position: "bottomright"
+    });
+
+
+leyenda.onAdd =
+function() {
+
+    const div =
+        L.DomUtil.create(
+            "div",
+            "leyenda"
+        );
+
+
+    div.innerHTML = `
+
+        <div class="leyenda-titulo">
+            🗺️ Tipos de atractivos
+        </div>
+
+        <div class="leyenda-item">
+            <span
+                class="leyenda-emoji"
+                style="background:#2a9d8f"
+            >
+                🌄
+            </span>
+            Naturaleza
+        </div>
+
+        <div class="leyenda-item">
+            <span
+                class="leyenda-emoji"
+                style="background:#e63946"
+            >
+                🪨
+            </span>
+            Arqueología
+        </div>
+
+        <div class="leyenda-item">
+            <span
+                class="leyenda-emoji"
+                style="background:#fca311"
+            >
+                🍷
+            </span>
+            Viñas
+        </div>
+
+        <div class="leyenda-item">
+            <span
+                class="leyenda-emoji"
+                style="background:#fca311"
+            >
+                🧀
+            </span>
+            Queserías
+        </div>
+
+        <div class="leyenda-item">
+            <span
+                class="leyenda-emoji"
+                style="background:#007bff"
+            >
+                🏛️
+            </span>
+            Patrimonio
+        </div>
+
+        <div class="leyenda-item">
+            <span
+                class="leyenda-emoji"
+                style="background:#5cb85c"
+            >
+                🌳
+            </span>
+            Plazas y parques
+        </div>
+
+    `;
+
+
+    return div;
+
+};
+
+
+leyenda.addTo(mapa);
+
+
+/* ==========================================================
+   BOTÓN SALAMANCA
+========================================================== */
+
+const botonCentrar =
+    L.control({
+        position: "topright"
+    });
+
+
+botonCentrar.onAdd =
+function() {
+
+    const boton =
+        L.DomUtil.create(
+            "button",
+            "centrar"
+        );
+
+
+    boton.innerHTML =
+        "📍 Salamanca";
+
+
+    boton.onclick =
+    function() {
+
+        mapa.setView(
+
+            [
+                -31.7810127,
+                -70.9658949
+            ],
+
+            11
+
+        );
+
+    };
+
+
+    return boton;
+
+};
+
+
+botonCentrar.addTo(mapa);
+
+
+/* ==========================================================
+   INICIAR
+========================================================== */
+
+mostrarLugares();
+
+
+</script>
+
+</body>
+
+</html>
